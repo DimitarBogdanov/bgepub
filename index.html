@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="bg" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>BGEPUB - Безплатни електронни учебници</title>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+      crossorigin="anonymous"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css"
+      integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU"
+      crossorigin="anonymous">
+
+    <script
+      src="./content.js"></script>
+
+    <style>
+    .chooser {
+      padding: 15px; background-color: #dedede;
+      border: 2px solid #cccccc;
+    }
+
+    .chooser > h1 {
+      text-align: center;
+    }
+    </style>
+
+    <script>
+      // BGEPUB
+
+      function hideNavButtons() {
+        $("#navbarSupportedContent").attr("style", "display: none !important;");
+      }
+
+      function showNavButtons() {
+        $("#navbarSupportedContent").attr("style", "display: inherit !important;");
+      }
+
+      function loadTextbook(id) {
+        textbook = content[id];
+        let textbookText = textbook.name + " (" + textbook.publisher + ", " + textbook.grade + " клас)"
+
+        showContent();
+
+        $("#currentTextbook").text("Зареждане: " + textbookText);
+
+        $("#content").html("<iframe style='width: 100% !important; height: 90vh !important;' src='" + textbook.href + "' title='Учебник'>");
+
+        $("#currentTextbook").text(textbookText);
+
+        document.title = textbookText + " | BGEPUB";
+      }
+
+      function showChooser() {
+        $("#content").attr("style", "display: none !important;");
+        $("#chooser").attr("style", "display: inherit !important;");
+        $("#navbarSupportedContent").attr("style", "display: none !important;");
+        document.title = "BGEPUB - Безплатни електронни учебници";
+      }
+
+      function showContent() {
+        $("#chooser").attr("style", "display: none !important;");
+        $("#content").attr("style", "display: inherit !important;");
+        $("#navbarSupportedContent").attr("style", "display: inherit !important;");
+      }
+    </script>
+
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" style="height: 8vh !important;">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">BGEPUB</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active disabled" id="currentTextbook">Зареждане...</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="showChooser()">Избери друг учебник</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div style="height: 1vh !important;">&nbsp;</div>
+          <div id="content" class="container-fluid" style="display: inherit !important;"></div>
+          <div id="chooser" style="display: none !important;" class="chooser">
+            <h1>Учебници</h1>
+            <hr />
+            <br />
+
+            <div id="textbooks"></div>
+
+            <script>
+              let publishers = []
+              content.forEach((item, i) => {
+                let foundPub = false;
+                publishers.forEach((publisher, i) => {
+                  if (publisher.name === item.publisher) {
+                    foundPub = true;
+                    publisher.textbooks.push(item);
+                  }
+                });
+
+                if (!foundPub) {
+                  publishers.push({
+                    name: item.publisher,
+                    textbooks: [ item ]
+                  })
+                }
+              });
+
+              let textbookI = 0;
+
+              publishers.forEach((publisher, i) => {
+                $("#textbooks").append("<h2>" + publisher.name + "</h2><div id='pub_" + publisher.name.replace(' ', '_') + "'></div><br />");
+                let grades = []
+                for (let j = 1; j <= 12; j++) {
+                  grades[j] = [];
+                }
+                publisher.textbooks.forEach((textbook, j) => {
+                  grades[textbook.grade].push(textbook);
+                });
+
+                grades.forEach((grade, i) => {
+                  if (grade.length > 0) {
+                    $("#pub_" + publisher.name.replace(' ', '_')).append("<h5>" + i + ". клас</h5>");
+                    grade.forEach((textbook, j) => {
+                      $("#pub_" + publisher.name.replace(' ', '_')).append("<a href='#' onclick='loadTextbook(" + (textbookI++) + ")'>" + textbook.name + "</a><br />");
+                    });
+                      $("#pub_" + publisher.name.replace(' ', '_')).append("<br />");
+                  }
+                });
+              });
+
+            </script>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script>
+      showChooser();
+    </script>
+  </body>
+</html>
